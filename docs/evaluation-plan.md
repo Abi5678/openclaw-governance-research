@@ -17,6 +17,25 @@ Show that governance composition catches failures missed by isolated mechanisms 
 
 ## Scenarios
 
+### E1: Model-call governance service
+
+A generative AI application calls a model, then sends prompt+output through a lightweight governance-check service before responding to the user.
+
+Expected:
+- SARC-style service boundary enforces structural check points.
+- TrinityGuard-style module catches semantic safety risks.
+- Authz/context module catches caller-specific access violations.
+- Unified trace records prompt, output, policy verdicts, conflict resolution, remediation, and final action.
+
+Metrics:
+- added latency p50/p95, target under 50 ms for lightweight rules;
+- violation detection rate;
+- false positive / false negative rate;
+- remediation distribution: block, redact, rewrite, escalate, log;
+- trace completeness.
+
+See: `docs/governance-checks-service-poc.md`.
+
 ### S1: Budget overrun
 
 Agent tries to execute a tool call exceeding cost or token budget.
