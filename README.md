@@ -44,4 +44,4 @@ This runs a deterministic toy benchmark comparing:
 - naive composition
 - ordered composition with conflict resolution
 
-The benchmark is intentionally simple first; it defines the evaluation shape before we plug in real OpenClaw/SARC components.
+The benchmark is intentionally simple first; it defines the evaluation shape before we plug in real OpenClaw/SARC components. Detailed rows include `conflict_count` and the distinct non-allow interventions so composition-specific cases such as SARC `throttle` versus AsyncFC `serialize` are visible in the trace output.
