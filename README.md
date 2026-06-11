@@ -31,17 +31,22 @@ This repository turns Abishek's OpenClaw/SARC experiments into a publishable sys
 5. Unified governance trace tree.
 6. Benchmark of composition-specific agent governance failures.
 
-## Quick experiment
+## Quick experiments
+
+Composition failure-mode benchmark:
 
 ```bash
 python3 experiments/composition_benchmark.py
 ```
 
-This runs a deterministic toy benchmark comparing:
+Model-call governance-check service benchmark:
 
-- no governance
-- single mechanisms
-- naive composition
-- ordered composition with conflict resolution
+```bash
+python3 experiments/governance_service_benchmark.py
+# optional reproducible per-case artifact
+python3 experiments/governance_service_benchmark.py --csv results/governance_service_benchmark.csv
+```
 
-The benchmark is intentionally simple first; it defines the evaluation shape before we plug in real OpenClaw/SARC components. Detailed rows include `conflict_count` and the distinct non-allow interventions so composition-specific cases such as SARC `throttle` versus AsyncFC `serialize` are visible in the trace output.
+The composition benchmark is intentionally simple first; it defines the evaluation shape before we plug in real OpenClaw/SARC components. Detailed rows include `conflict_count` and the distinct non-allow interventions so composition-specific cases such as SARC `throttle` versus AsyncFC `serialize` are visible in the trace output.
+
+The service benchmark adds a product-aligned model-call boundary with deterministic safe, PII, toxicity, brand-safety, regulatory-disclaimer, and mixed/conflict cases. It reports accuracy, violation detection, false positive/negative rates, p50/p95 added latency, remediation distribution, and trace completeness for issue #5.
