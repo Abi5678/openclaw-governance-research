@@ -1,8 +1,8 @@
 # Related Work Matrix
 
-**Access date:** 2026-06-13
+**Access date:** 2026-06-18
 
-This matrix is scoped to the paper’s novelty claim: **composable runtime governance for recursive tool-using/meta-agent systems**. The key gap is not any single control mechanism, but how control, delegation, ordering, conflict resolution, and auditability compose at runtime.
+This matrix is scoped to the paper’s novelty claim: **composable runtime governance for recursive tool-using/meta-agent systems**. The key gap is not any single control mechanism or benchmark, but how control, delegation, ordering, conflict resolution, and auditability compose at runtime.
 
 ## Summary
 
@@ -14,6 +14,10 @@ This matrix is scoped to the paper’s novelty claim: **composable runtime gover
 | Five-Plane Reference Architecture for Runtime Governance of Production AI Agents | Composed authority, mediation points, structured evidence substrate | Strong enterprise/runtime governance architecture and evidence framing | More oriented to a reference architecture for production governance than to recursive agent adapters, module ordering semantics, or benchmarked module composition failures |
 | Governance-Aware Agent Telemetry | Closed-loop telemetry-to-enforcement with tamper-evident traces | Strong observability-to-enforcement bridge and cross-agent lineage tracking | Centers telemetry and enforcement loop, but not the abstract composition rules for multiple governance modules with conflicting verdicts |
 | Harnessing Embodied Agents: Runtime Governance for Policy-Constrained Execution | Runtime governance layer for embodied execution with admission, monitoring, rollback, human override | Clear separation between cognition and execution oversight | Domain is embodied/robotic execution; does not address meta-agent delegation chains, tool-using agent composition, or unified governance traces across heterogeneous modules |
+| ToolEmu | LM-emulated sandbox for identifying risky tool-use agent failures across 36 high-stakes tools and 144 test cases | Scales safety evaluation without implementing every tool/environment; explicitly studies private-data leakage, financial loss, and severe tool-use failures | Evaluates agent/tool safety outcomes, but not governance-module composition, authorization propagation, deterministic ordering semantics, or trace reconciliation across multiple runtime controls |
+| τ-bench | Dynamic tool-agent-user benchmark with domain API tools, policy guidelines, database-state evaluation, and pass^k reliability | Strong fit for real-world tool use and policy-following reliability under repeated trials | Benchmarks task/policy success for agents, not the composition behavior of independent governance modules or conflicts such as deny vs rewrite vs serialize |
+| AgentBench | Multi-environment benchmark for evaluating LLMs as agents in interactive settings | Broad coverage of reasoning, decision-making, long-horizon interaction, and instruction following across eight environments | Focuses on agent capability and failure causes, not runtime governance composition or auditable enforcement semantics |
+| HELM | Holistic evaluation framework/leaderboards spanning capabilities, safety, AIR-Bench, domain benchmarks, and other model-evaluation axes | Establishes transparent, multi-metric evaluation practice and living benchmark infrastructure | Model-centric and benchmark-infrastructure focused; does not target recursive tool-agent governance layers, delegation, or cross-module conflict resolution |
 
 ## Positioning notes
 
@@ -37,6 +41,11 @@ This matrix is scoped to the paper’s novelty claim: **composable runtime gover
    - It reinforces the runtime-governance pattern.
    - But the paper’s target is recursive tool-using agents and their governance composition failures.
 
+6. **Agent benchmarks motivate composition-specific evaluation but do not replace it.**
+   - ToolEmu, τ-bench, AgentBench, and HELM show how to evaluate tool-use risk, real-world policy following, interactive agent competence, and broad model safety/capability axes.
+   - OpenClaw-Govern should cite them as benchmark lineage while making clear that our evaluation unit is the **governance composition layer**: ordered runtime modules, delegated authority envelopes, async controls, intervention conflicts, and unified trace completeness.
+   - This supports a benchmark design in which the expected output is not only task success/failure but also whether the composed governance stack produced the right final verdict, preserved the right evidence, and surfaced conflicts deterministically.
+
 ## Sources
 
 - SARC: https://arxiv.org/html/2605.07728v1
@@ -45,3 +54,7 @@ This matrix is scoped to the paper’s novelty claim: **composable runtime gover
 - Five-Plane Reference Architecture for Runtime Governance of Production AI Agents: https://arxiv.org/html/2606.12320v1
 - Governance-Aware Agent Telemetry for Closed-Loop Enforcement in Multi-Agent AI Systems: https://arxiv.org/html/2604.05119v1
 - Harnessing Embodied Agents: Runtime Governance for Policy-Constrained Execution: https://arxiv.org/html/2604.07833v3
+- ToolEmu / Identifying the Risks of LM Agents with an LM-Emulated Sandbox: https://arxiv.org/abs/2309.15817
+- τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains: https://arxiv.org/abs/2406.12045
+- AgentBench: Evaluating LLMs as Agents: https://arxiv.org/abs/2308.03688
+- HELM: https://crfm.stanford.edu/helm/
