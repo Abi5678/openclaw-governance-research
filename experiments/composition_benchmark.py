@@ -3,8 +3,19 @@
 
 This is intentionally small. It establishes the evaluation shape before real
 OpenClaw/SARC modules are plugged in.
+
+Features:
+- Accuracy measurement across 8 scenarios × 8 strategies
+- Latency/overhead measurement (mean, median, p95)
+- CSV export for plotting
+- Conflict counting and trace completeness metrics
 """
+import argparse
+import csv
+import statistics
+import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict, List, Tuple
 
 ALLOW = "allow"
@@ -166,24 +177,74 @@ def run_strategy(strategy: str, actions: List[Action]) -> Tuple[str, List[Decisi
     return resolve_ordered(decisions), decisions
 
 
-def score():
+def percentile(values: List[float], pct: float) -> float:
+    """Calculate percentile of a sorted list."""
+    if not values:
+        return 0.0
+    ordered = sorted(values)
+    index = (len(ordered) - 1) * pct / 100
+    lower = int(index)
+    upper = min(lower + 1, len(ordered) - 1)
+    weight = index - lower
+    return ordered[lower] * (1 - weight) + ordered[upper] * weight
+
+
+def score(csv_path: Path = None):
     strategies = ["none", "sarc_only", "authz_only", "guardrail_only", "roma_only", "async_only", "naive_composition", "openclaw_ordered"]
     rows = []
+    strategy_latencies: Dict[str, List[float]] = {s: [] for s in strategies}
+    
     for strategy in strategies:
         correct = 0
         for name, actions, expected in TASKS:
+            start = time.perf_counter_ns()
             observed, decisions = run_strategy(strategy, actions)
+            latency_ms = (time.perf_counter_ns() - start) / 1_000_000
+            strategy_latencies[strategy].append(latency_ms)
+            
             ok = observed == expected
             correct += int(ok)
             trace_refs = ",".join(sorted({d.trace_ref for d in decisions if d.trace_ref}))
             interventions = non_allow_verdicts(decisions)
             conflict_count = max(0, len(interventions) - 1)
-            rows.append((strategy, name, expected, observed, ok, len(decisions), conflict_count, ",".join(interventions), trace_refs))
+            rows.append({
+                "strategy": strategy,
+                "scenario": name,
+                "expected": expected,
+                "observed": observed,
+                "ok": ok,
+                "latency_ms": f"{latency_ms:.4f}",
+                "decisions": len(decisions),
+                "conflict_count": conflict_count,
+                "interventions": ",".join(interventions) if interventions else "none",
+                "trace_refs": trace_refs,
+            })
         print(f"{strategy:20s} accuracy={correct}/{len(TASKS)}")
+    
+    # Print latency summary
+    print("\nLatency overhead (ms per scenario):")
+    for strategy in strategies:
+        lats = strategy_latencies[strategy]
+        print(f"  {strategy:20s} mean={statistics.mean(lats):.4f}, median={statistics.median(lats):.4f}, p95={percentile(lats, 95):.4f}")
+    
     print("\nDetailed results:")
     for row in rows:
-        print(" | ".join(map(str, row)))
+        print(" | ".join(str(row[k]) for k in ["strategy", "scenario", "expected", "observed", "ok", "latency_ms", "conflict_count", "interventions"]))
+    
+    if csv_path:
+        csv_path.parent.mkdir(parents=True, exist_ok=True)
+        with csv_path.open("w", newline="") as handle:
+            fieldnames = ["strategy", "scenario", "expected", "observed", "ok", "latency_ms", "decisions", "conflict_count", "interventions", "trace_refs"]
+            writer = csv.DictWriter(handle, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+        print(f"\nwrote_csv: {csv_path}")
+    
+    return rows
 
 
 if __name__ == "__main__":
-    score()
+    parser = argparse.ArgumentParser(description="Composition benchmark with latency measurement")
+    parser.add_argument("--csv", type=Path, help="Output CSV file path")
+    args = parser.parse_args()
+    score(args.csv)
