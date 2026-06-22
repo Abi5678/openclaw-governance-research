@@ -1,0 +1,9 @@
+# OpenClaw-Govern: Composable Runtime Governance for Recursive Tool-Using Agents
+
+**Abishek Bangalore Muralikrishna**  
+University of New Hampshire  
+abishek@unh.edu
+
+## Abstract
+
+Multi-agent and tool-using AI systems are increasingly deployed in high-stakes domains, yet current governance approaches focus on single control mechanisms—constraints, guardrails, authorization—without addressing how these heterogeneous modules compose at runtime. We present OpenClaw-Govern, a composable runtime governance layer for recursive tool-using and meta-agent systems. Our key contribution is not any individual control mechanism, but a **composition architecture** that defines: (1) ordered module execution with deterministic resolution semantics, (2) delegation-envelope propagation across authority boundaries, (3) conflict detection and arbitration among conflicting verdicts (ALLOW, DENY, THROTTLE, SERIALIZE, ESCALATE), and (4) unified trace trees that reconstruct governance decisions across modules. We formalize eight composition-specific failure modes and evaluate our approach against baseline strategies (single-module, naive composition, short-circuit evaluation). Our ordered composition strategy achieves 100% accuracy on all failure modes, while naive composition and single-module baselines fail on 5–7 of 8 scenarios. When evaluated with real governance adapters (SARC, authorization propagation, async execution controllers), accuracy results hold with ~0.012ms absolute latency overhead per governed action. We position OpenClaw-Govern relative to SARC, runtime authorization overlays, path-based governance, telemetry architectures, and agent safety benchmarks (ToolEmu, τ-bench, AgentBench, HELM), showing that these works motivate but do not replace composition-specific governance evaluation.

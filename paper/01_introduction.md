@@ -1,0 +1,11 @@
+## 1. Introduction
+
+Artificial intelligence agents are no longer single-turn query-response systems. Modern agents delegate tasks to subordinate agents, execute tools asynchronously across trust boundaries, and maintain persistent memory across sessions. A procurement agent might delegate budget approval to a subordinate, which in turn calls a payment API while a guardrail module scans for PII leakage and an authorization module validates that the delegated scope permits the expenditure. These systems are *recursive* (agents can delegate to agents), *tool-using* (they invoke external APIs, databases, and services), and *multi-agent* (multiple autonomous entities coordinate toward shared or competing goals).
+
+Current governance approaches for such agents focus on **single control mechanisms**. SARC compiles constraints into runtime enforcement sites but does not specify how constraint checks compose with authorization or guardrail modules [1]. Authorization overlays formalize delegation and scope attenuation but treat governance as purely a permission problem [2]. Guardrail systems detect toxic output or PII leakage but assume they are the sole governance layer [3]. Benchmarks like ToolEmu, τ-bench, and AgentBench evaluate agent safety and capability but do not isolate **composition behavior**—what happens when multiple governance modules simultaneously evaluate the same action and produce conflicting verdicts [4–7].
+
+This fragmentation creates a critical gap: **composition failures**. When multiple governance modules operate on the same agent action without defined ordering, conflict resolution, or unified auditing, the system exhibits non-deterministic behavior. A guardrail might ALLOW an action while authorization DENIEs it; a budget constraint might THROTTLE while an async controller demands SERIALIZE. Without a composition layer, the final verdict depends on incidental factors like module call order or short-circuit logic, leading to bypasses, conflicts hidden from audit logs, and fragmented traces that cannot reconstruct what decisions were made and why.
+
+We present **OpenClaw-Govern**, a composable runtime governance architecture that treats composition as a first-class problem. Our key insight is that governance modules must not only exist—they must **compose** with:
+
+1. **Ordered execution** that respects dependency
