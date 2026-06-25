@@ -1,14 +1,15 @@
 # Related Work Matrix
 
-**Access date:** 2026-06-18
+**Access date:** 2026-06-25
 
-This matrix is scoped to the paper’s novelty claim: **composable runtime governance for recursive tool-using/meta-agent systems**. The key gap is not any single control mechanism or benchmark, but how control, delegation, ordering, conflict resolution, and auditability compose at runtime.
+This matrix is scoped to the paper’s novelty claim: **composable runtime governance for recursive tool-using/meta-agent systems**. The key gap is not any single control mechanism or benchmark, but how control, delegation, ordering, conflict resolution, and auditability compose at runtime. In particular, ROMA-style recursive orchestration is useful for delegation and traceability, but it does not by itself resolve governance conflicts across runtime modules.
 
 ## Summary
 
 | Work | Core contribution | What it does well | What it does not cover for OpenClaw-Govern |
 | --- | --- | --- | --- |
 | SARC | Compiles constraints into runtime enforcement sites (pre-action, action-time, post-action, escalation) | Strong runtime enforcement framing; auditable constraints | Does not by itself solve composition across heterogeneous governance modules, ordering semantics, or conflict resolution across delegation/async/guardrail layers |
+| ROMA / Recursive Open Meta-Agent | Recursive task decomposition with Atomizer/Planner/Executor/Aggregator roles and traceable context flow | Strong hierarchical orchestration, delegation structure, and transparent execution traces | Does not define a governance layer for arbitration among runtime controls; traceability is orchestration-level, not conflict-resolution semantics |
 | Overlaying Governance / compositional authorization | Delegation and scope attenuation for agentic access; overlays agent semantics onto existing policies | Formalizes delegation paths and scope attenuation | Focuses on authorization semantics, not the full governance stack: async controls, guardrail arbitration, unified traces, or cross-module conflict resolution |
 | Runtime Governance for AI Agents: Policies on Paths | Makes execution path the object of governance; path-dependent policy evaluation | Captures non-deterministic, sequence-sensitive policy risks | Does not provide a compositional governance architecture with multiple heterogeneous modules and deterministic resolution rules |
 | Five-Plane Reference Architecture for Runtime Governance of Production AI Agents | Composed authority, mediation points, structured evidence substrate | Strong enterprise/runtime governance architecture and evidence framing | More oriented to a reference architecture for production governance than to recursive agent adapters, module ordering semantics, or benchmarked module composition failures |
@@ -28,39 +29,46 @@ This matrix is scoped to the paper’s novelty claim: **composable runtime gover
    - SARC supplies the runtime constraint-enforcement mindset.
    - OpenClaw-Govern extends that into a **composition layer** for multiple governance modules.
 
-2. **Authorization work covers delegation, not the whole stack.**
+2. **ROMA covers recursive delegation, not governance arbitration.**
+   - ROMA's recursive task trees and traceable context flow are a strong fit for long-horizon decomposition.
+   - OpenClaw-Govern layers governance on top of that orchestration so conflicting runtime controls can be ordered and reconciled deterministically.
+
+3. **Authorization work covers delegation, not the whole stack.**
    - The overlay/compositional authorization line is a good fit for recursive delegation and scope attenuation.
    - Our novelty is broader: we compose authorization with semantic guardrails, async controls, and trace reconciliation.
 
-3. **Path-based governance captures ordering sensitivity but not heterogeneous composition.**
+4. **Path-based governance captures ordering sensitivity but not heterogeneous composition.**
    - Path governance explains why runtime matters.
    - OpenClaw-Govern adds how to resolve disagreements between runtime modules.
 
-4. **Telemetry architectures improve evidence but do not fully define policy composition.**
+5. **Telemetry architectures improve evidence but do not fully define policy composition.**
    - Closed-loop telemetry is complementary.
    - Our paper needs a deterministic governance layer above telemetry so evidence is not fragmented.
 
-5. **Robotics runtime governance is a useful analogy, not the target domain.**
+6. **Robotics runtime governance is a useful analogy, not the target domain.**
    - It reinforces the runtime-governance pattern.
    - But the paper’s target is recursive tool-using agents and their governance composition failures.
 
-6. **Agent benchmarks motivate composition-specific evaluation but do not replace it.**
+7. **Agent benchmarks motivate composition-specific evaluation but do not replace it.**
    - ToolEmu, τ-bench, AgentBench, and HELM show how to evaluate tool-use risk, real-world policy following, interactive agent competence, and broad model safety/capability axes.
    - OpenClaw-Govern should cite them as benchmark lineage while making clear that our evaluation unit is the **governance composition layer**: ordered runtime modules, delegated authority envelopes, async controls, intervention conflicts, and unified trace completeness.
    - This supports a benchmark design in which the expected output is not only task success/failure but also whether the composed governance stack produced the right final verdict, preserved the right evidence, and surfaced conflicts deterministically.
 
 ## Sources
 
-- SARC: https://arxiv.org/html/2605.07728v1
+- SARC: https://arxiv.org/html/2605.07728
 - Overlaying Governance: https://arxiv.org/html/2606.03518v1
 - Runtime Governance for AI Agents: Policies on Paths: https://arxiv.org/html/2603.16586v1
 - Five-Plane Reference Architecture for Runtime Governance of Production AI Agents: https://arxiv.org/html/2606.12320v1
 - Governance-Aware Agent Telemetry for Closed-Loop Enforcement in Multi-Agent AI Systems: https://arxiv.org/html/2604.05119
 - Harnessing Embodied Agents: Runtime Governance for Policy-Constrained Execution: https://arxiv.org/html/2604.07833v3
-- Authenticated Workflows: A Systems Approach to Protecting Agentic AI: https://arxiv.org/html/2602.10465v1
-- Autonomous Action Runtime Management (AARM): A System Specification for Securing AI-Driven Actions at Runtime: https://arxiv.org/html/2602.09433v1
-- Unsafer in Many Turns: Benchmarking and Defending Multi-Turn Safety Risks in Tool-Using Agents: https://arxiv.org/html/2602.13379
+- Authenticated Workflows: https://arxiv.org/html/2602.10465v1
+- Autonomous Action Runtime Management (AARM): https://arxiv.org/html/2602.09433v1
+- ROMA paper: https://arxiv.org/abs/2602.01848
+- ROMA repo: https://github.com/sentient-agi/ROMA
+- ROMA blog post: https://www.sentient.xyz/blog/recursive-open-meta-agent
+- Unsafer in Many Turns: https://arxiv.org/html/2602.13379
 - ToolEmu / Identifying the Risks of LM Agents with an LM-Emulated Sandbox: https://arxiv.org/abs/2309.15817
-- τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains: https://arxiv.org/abs/2406.12045
-- AgentBench: Evaluating LLMs as Agents: https://arxiv.org/abs/2308.03688
+- τ-bench: https://arxiv.org/abs/2406.12045
+- AgentBench: https://arxiv.org/abs/2308.03688
 - HELM: https://crfm.stanford.edu/helm/
