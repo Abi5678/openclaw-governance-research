@@ -1,6 +1,6 @@
 # Related Work Matrix
 
-**Access date:** 2026-06-25
+**Access date:** 2026-06-26
 
 This matrix is scoped to the paper’s novelty claim: **composable runtime governance for recursive tool-using/meta-agent systems**. The key gap is not any single control mechanism or benchmark, but how control, delegation, ordering, conflict resolution, and auditability compose at runtime. In particular, ROMA-style recursive orchestration is useful for delegation and traceability, but it does not by itself resolve governance conflicts across runtime modules.
 
@@ -16,6 +16,7 @@ This matrix is scoped to the paper’s novelty claim: **composable runtime gover
 | Governance-Aware Agent Telemetry | Closed-loop telemetry-to-enforcement with tamper-evident traces | Strong observability-to-enforcement bridge and cross-agent lineage tracking | Centers telemetry and enforcement loop, but not the abstract composition rules for multiple governance modules with conflicting verdicts |
 | Harnessing Embodied Agents: Runtime Governance for Policy-Constrained Execution | Runtime governance layer for embodied execution with admission, monitoring, rollback, human override | Clear separation between cognition and execution oversight | Domain is embodied/robotic execution; does not address meta-agent delegation chains, tool-using agent composition, or unified governance traces across heterogeneous modules |
 | Authenticated Workflows / MAPL | Cryptographic trust layer for agentic workflows across prompts, tools, data, and context | Strong boundary-oriented security model; explicit policy composition and deterministic reject/allow semantics | Emphasizes cryptographic trust and boundary protection more than runtime arbitration among heterogeneous governance modules, ordering semantics, or trace reconciliation |
+| XACML policy-combining standards / OPA decision logs | Deterministic policy-combining algorithms and auditable decision records | Clear precedent for ordered/override policy arbitration and traceable enforcement decisions | Operates at access-control policy boundaries; does not define recursive tool-agent delegation envelopes, async correlated risk handling, or heterogeneous runtime module conflict resolution |
 | AARM | Runtime interception of AI-driven actions with contextual evaluation and tamper-evident receipts | Clear action-layer security boundary; supports allow/deny/modify/defer/step-up decisions | Does not define a composition layer for multiple governance modules, conflict resolution across modules, or benchmarked module ordering |
 | MT-AgentRisk | Multi-turn tool-using-agent safety benchmark with decomposed harmful tasks | Captures multi-turn and tool-mediated safety risks that single-turn benchmarks miss | Evaluates harmful task execution, not governance-module composition, delegation propagation, or unified governance traces |
 | ToolEmu | LM-emulated sandbox for identifying risky tool-use agent failures across 36 high-stakes tools and 144 test cases | Scales safety evaluation without implementing every tool/environment; explicitly studies private-data leakage, financial loss, and severe tool-use failures | Evaluates agent/tool safety outcomes, but not governance-module composition, authorization propagation, deterministic ordering semantics, or trace reconciliation across multiple runtime controls |
@@ -54,6 +55,10 @@ This matrix is scoped to the paper’s novelty claim: **composable runtime gover
    - OpenClaw-Govern should cite them as benchmark lineage while making clear that our evaluation unit is the **governance composition layer**: ordered runtime modules, delegated authority envelopes, async controls, intervention conflicts, and unified trace completeness.
    - This supports a benchmark design in which the expected output is not only task success/failure but also whether the composed governance stack produced the right final verdict, preserved the right evidence, and surfaced conflicts deterministically.
 
+8. **Policy-combining standards and policy-as-code engines are adjacent but narrower.**
+   - XACML defines deterministic policy-combining algorithms, and OPA's decision logs provide a useful audit precedent.
+   - OpenClaw-Govern extends that lineage into recursive agent governance, where ordering must reconcile delegated authority, semantic guardrails, async correlation, and unified traces across multiple runtime modules.
+
 ## Sources
 
 - SARC: https://arxiv.org/html/2605.07728
@@ -63,10 +68,13 @@ This matrix is scoped to the paper’s novelty claim: **composable runtime gover
 - Governance-Aware Agent Telemetry for Closed-Loop Enforcement in Multi-Agent AI Systems: https://arxiv.org/html/2604.05119
 - Harnessing Embodied Agents: Runtime Governance for Policy-Constrained Execution: https://arxiv.org/html/2604.07833v3
 - Authenticated Workflows: https://arxiv.org/html/2602.10465v1
+- XACML 3.0 core spec: https://docs.oasis-open.org/xacml/3.0/xacml-3.0-core-spec-os-en.html
+- XACML 3.0 Additional Combining Algorithms Profile: https://docs.oasis-open.org/xacml/xacml-3.0-combalgs/v1.0/csprd03/xacml-3.0-combalgs-v1.0-csprd03.html
 - Autonomous Action Runtime Management (AARM): https://arxiv.org/html/2602.09433v1
 - ROMA paper: https://arxiv.org/abs/2602.01848
 - ROMA repo: https://github.com/sentient-agi/ROMA
 - ROMA blog post: https://www.sentient.xyz/blog/recursive-open-meta-agent
+- OPA decision logs: https://openpolicyagent.org/docs/management-decision-logs
 - Unsafer in Many Turns: https://arxiv.org/html/2602.13379
 - ToolEmu / Identifying the Risks of LM Agents with an LM-Emulated Sandbox: https://arxiv.org/abs/2309.15817
 - τ-bench: https://arxiv.org/abs/2406.12045
