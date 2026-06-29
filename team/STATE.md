@@ -1,18 +1,18 @@
 # OpenClaw Team — Shared State
 
-Last updated: 2026-06-29 (initial scaffold)
+Last updated: 2026-06-29
 
 ## Pipeline status
 
 | Role       | Last run        | Last artifact         | Status      |
 |------------|-----------------|-----------------------|-------------|
-| researcher | (not yet)       | (none)                | IDLE        |
+| researcher | 2026-06-29      | team/RESEARCH_2026-06-29.md | DONE        |
 | builder    | (not yet)       | (none)                | IDLE        |
-| reviewer   | (not yet)       | (none)                | IDLE        |
+| reviewer   | 2026-06-29      | team/REVIEW_2026-06-29.md | APPROVED    |
 
 ## Active increment
 
-(none — researcher is next)
+(trace-reconstruction / audit-reconstruction benchmark scenario — awaiting builder)
 
 ## Blockers
 
