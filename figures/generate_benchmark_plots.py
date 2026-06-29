@@ -1,67 +1,90 @@
 """
-Generate paper figures for OpenClaw-Govern:
-1. Architecture diagram (as ASCII/SVG)
-2. Accuracy bar chart from benchmark CSV data
+Generate the accuracy bar chart for OpenClaw-Govern from real benchmark output.
+
+Accuracy is computed directly from results/composition_benchmark.csv (the `ok`
+column) so the figure can never drift from the measured results. Run the
+benchmark first:
+
+    python3 experiments/composition_benchmark.py --csv results/composition_benchmark.csv
+    python3 figures/generate_benchmark_plots.py
 """
 
+import csv
+from collections import OrderedDict
+from pathlib import Path
+
 import matplotlib.pyplot as plt
-import numpy as np
 
-# Data from composition benchmark
-strategies = ["None", "SARC", "AuthZ", "Guardrail", "ROMA", "Async", "Naive", "OpenClaw"]
-accuracy = [1/8, 2/8, 3/8, 2/8, 2/8, 3/8, 1/8, 8/8]
-latency_ms = [0.0010, 0.0123, 0.0040, 0.0021, 0.0023, 0.0025, 0.0061, 0.0130]
+ROOT = Path(__file__).resolve().parent.parent
+CSV_PATH = ROOT / "results" / "composition_benchmark.csv"
 
-# Create figure with 2 subplots
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+# Display order and short labels.
+LABELS = OrderedDict([
+    ("none", "None"),
+    ("sarc_only", "SARC"),
+    ("authz_only", "AuthZ"),
+    ("guardrail_only", "Guardrail"),
+    ("roma_only", "ROMA"),
+    ("async_only", "Async"),
+    ("naive_composition", "Naive"),
+    ("priority_composition", "Priority"),
+    ("openclaw_ordered", "OpenClaw"),
+])
 
-# Plot 1: Accuracy bar chart
-colors = ['#d3d3d3', '#d3d3d3', '#d3d3d3', '#d3d3d3', '#d3d3d3', '#d3d3d3', '#ff7f7f', '#4CAF50']
-bars1 = ax1.bar(strategies, [a*100 for a in accuracy], color=colors, edgecolor='black', linewidth=1.2)
+# Tally accuracy from the measured CSV.
+totals = {k: [0, 0] for k in LABELS}  # strategy -> [correct, total]
+with CSV_PATH.open() as handle:
+    for row in csv.DictReader(handle):
+        strat = row["strategy"]
+        if strat not in totals:
+            continue
+        totals[strat][1] += 1
+        if str(row["ok"]).strip().lower() == "true":
+            totals[strat][0] += 1
 
-ax1.set_ylabel('Accuracy (%)', fontsize=11)
-ax1.set_title('Composition Correctness (8 scenarios)', fontsize=12, fontweight='bold')
-ax1.set_ylim(0, 110)
-ax1.axhline(y=100, color='green', linestyle='--', linewidth=1.5, alpha=0.7, label='Perfect')
-ax1.axhline(y=50, color='gray', linestyle=':', linewidth=1, alpha=0.5)
+strategies = [LABELS[k] for k in LABELS]
+accuracy = [(totals[k][0] / totals[k][1]) if totals[k][1] else 0.0 for k in LABELS]
 
-# Add value labels on bars
-for bar, acc in zip(bars1, accuracy):
-    height = bar.get_height()
-    ax1.text(bar.get_x() + bar.get_width()/2., height + 2,
-             f'{acc*100:.0f}%', ha='center', va='bottom', fontsize=9)
+fig, ax = plt.subplots(figsize=(8, 4.5))
 
-ax1.legend(loc='upper right')
-ax1.grid(axis='y', alpha=0.3, linestyle='--')
-plt.xticks(rotation=30, ha='right')
+colors = []
+for k in LABELS:
+    if k == "openclaw_ordered":
+        colors.append("#4CAF50")      # our approach
+    elif k == "priority_composition":
+        colors.append("#fd8d3c")      # strongest baseline
+    elif k == "naive_composition":
+        colors.append("#ff7f7f")      # weak composition baseline
+    else:
+        colors.append("#d3d3d3")      # single-module / none
 
-# Plot 2: Latency comparison
-bars2 = ax2.bar(strategies, latency_ms, color='#6baed6', edgecolor='black', linewidth=1.2)
-ax2.set_ylabel('Latency (ms per action)', fontsize=11)
-ax2.set_title('Runtime Overhead (real adapters)', fontsize=12, fontweight='bold')
-ax2.set_ylim(0, 0.018)
+bars = ax.bar(strategies, [a * 100 for a in accuracy],
+              color=colors, edgecolor="black", linewidth=1.2)
 
-# Highlight OpenClaw overhead
-for i, bar in enumerate(bars2):
-    if strategies[i] == 'OpenClaw':
-        bar.set_color('#fd8d3c')
+ax.set_ylabel("Accuracy (%)", fontsize=11)
+ax.set_title("Composition Correctness (8 scenarios)", fontsize=12, fontweight="bold")
+ax.set_ylim(0, 112)
+ax.axhline(y=100, color="green", linestyle="--", linewidth=1.3, alpha=0.7, label="Perfect")
+ax.grid(axis="y", alpha=0.3, linestyle="--")
 
-# Add value labels
-for bar, lat in zip(bars2, latency_ms):
-    height = bar.get_height()
-    ax2.text(bar.get_x() + bar.get_width()/2., height + 0.0005,
-             f'{lat:.3f}ms', ha='center', va='bottom', fontsize=8)
+for bar, k in zip(bars, LABELS):
+    correct, total = totals[k]
+    ax.text(bar.get_x() + bar.get_width() / 2., bar.get_height() + 2,
+            f"{correct}/{total}", ha="center", va="bottom", fontsize=9)
 
-ax2.axhline(y=0.0010, color='gray', linestyle='--', linewidth=1, alpha=0.7, label='Baseline (no gov)')
-ax2.legend(loc='upper left')
-ax2.grid(axis='y', alpha=0.3, linestyle='--')
-plt.xticks(rotation=30, ha='right')
-
+ax.legend(loc="upper left")
+plt.xticks(rotation=30, ha="right")
 plt.tight_layout()
-plt.savefig('/Users/abishek/Projects/research-publications/openclaw-governance/openclaw-governance-research/figures/benchmark_results.png', dpi=300, bbox_inches='tight')
-plt.savefig('/Users/abishek/Projects/research-publications/openclaw-governance/openclaw-governance-research/figures/benchmark_results.svg', format='svg', bbox_inches='tight')
+
+png = ROOT / "figures" / "benchmark_accuracy.png"
+svg = ROOT / "figures" / "benchmark_accuracy.svg"
+plt.savefig(png, dpi=300, bbox_inches="tight")
+plt.savefig(svg, format="svg", bbox_inches="tight")
 plt.close()
 
-print("✓ Bar charts generated:")
-print(f"  - figures/benchmark_results.png (300 DPI)")
-print(f"  - figures/benchmark_results.svg (vector)")
+print("Accuracy tallied from", CSV_PATH)
+for k in LABELS:
+    correct, total = totals[k]
+    print(f"  {k:22s} {correct}/{total}")
+print("Wrote:", png)
+print("Wrote:", svg)

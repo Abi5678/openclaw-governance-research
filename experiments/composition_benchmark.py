@@ -134,6 +134,21 @@ def resolve_ordered(decisions: List[Decision]) -> str:
     return ALLOW
 
 
+def resolve_priority(decisions: List[Decision]) -> str:
+    """Highest-priority non-ALLOW module wins, regardless of verdict strength.
+
+    Models deployments that rank modules by importance (authz/budget before
+    soft controls) rather than by intervention severity. Cannot express
+    "a weaker-priority module should dominate" (e.g. SERIALIZE over THROTTLE).
+    """
+    priority_order = ["sarc_budget", "authz", "guardrail", "roma_delegation", "asyncfc"]
+    for module_name in priority_order:
+        for d in decisions:
+            if d.module == module_name and d.verdict != ALLOW:
+                return d.verdict
+    return ALLOW
+
+
 def non_allow_verdicts(decisions: List[Decision]) -> List[str]:
     """Return distinct governance interventions for conflict/accounting metrics."""
     return sorted({d.verdict for d in decisions if d.verdict != ALLOW})
@@ -166,6 +181,15 @@ def run_strategy(strategy: str, actions: List[Action]) -> Tuple[str, List[Decisi
                 if d.verdict == ALLOW:
                     return ALLOW, decisions
         return ALLOW, decisions
+    elif strategy == "priority_composition":
+        # All modules run, but the final verdict is taken from the highest-priority
+        # module that objects, not from the strongest verdict. Stronger baseline
+        # than naive short-circuit; still mis-resolves verdict conflicts.
+        priority_modules = [sarc_budget, authz, guardrail, roma_delegation_adapter, asyncfc]
+        for action in actions:
+            for module in priority_modules:
+                decisions.append(module(action, ctx))
+        return resolve_priority(decisions), decisions
     elif strategy == "openclaw_ordered":
         modules = [authz, roma_delegation_adapter, sarc_budget, guardrail, asyncfc]
     else:
@@ -190,7 +214,7 @@ def percentile(values: List[float], pct: float) -> float:
 
 
 def score(csv_path: Path = None):
-    strategies = ["none", "sarc_only", "authz_only", "guardrail_only", "roma_only", "async_only", "naive_composition", "openclaw_ordered"]
+    strategies = ["none", "sarc_only", "authz_only", "guardrail_only", "roma_only", "async_only", "naive_composition", "priority_composition", "openclaw_ordered"]
     rows = []
     strategy_latencies: Dict[str, List[float]] = {s: [] for s in strategies}
     
@@ -235,7 +259,7 @@ def score(csv_path: Path = None):
         csv_path.parent.mkdir(parents=True, exist_ok=True)
         with csv_path.open("w", newline="") as handle:
             fieldnames = ["strategy", "scenario", "expected", "observed", "ok", "latency_ms", "decisions", "conflict_count", "interventions", "trace_refs"]
-            writer = csv.DictWriter(handle, fieldnames=fieldnames)
+            writer = csv.DictWriter(handle, fieldnames=fieldnames, lineterminator="\n")
             writer.writeheader()
             writer.writerows(rows)
         print(f"\nwrote_csv: {csv_path}")

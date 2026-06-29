@@ -58,17 +58,19 @@ Multi-agent and tool-using AI systems are increasingly deployed in high-stakes d
 
 See `experiments/composition_benchmark.py` and `experiments/governance_service_benchmark.py`.
 
-- Benchmark design: 8 scenarios, 8 strategies.
+- Benchmark design: 8 scenarios, 9 strategies.
 - Metrics:
   - Final verdict accuracy.
   - Conflict count per scenario.
   - Intervention diversity.
   - Trace completeness (can we reconstruct the full path?).
+  - Per-strategy latency overhead (mean/median/p95).
 - Results:
   - `openclaw_ordered`: 8/8 accuracy.
+  - `priority_composition`: 7/8 accuracy, still mis-resolves the `throttle` vs `serialize` conflict.
   - `naive_composition`: 1/8 (short-circuit failures).
   - Single-module baselines: 2-3/8 each.
-- Latency overhead: TODO (Issue #5).
+- Latency overhead is now measured in the benchmark output and CSV export, so the remaining work is to interpret it in the paper rather than collect it.
 
 ## 8. Related Work
 
@@ -104,8 +106,7 @@ See `docs/related-work.md` for full matrix.
 ## TODOs Before Submission
 
 - [ ] Replace toy modules with real SARC/Authz/AsyncFC adapters (Issue #1).
-- [ ] Add latency + accuracy benchmark with CSV export and plots (Issue #5).
 - [ ] Add Governance Checks as a Service PoC endpoint example (Issue #4).
 - [ ] Convert to LaTeX (or keep as MD for arXiv/SSRN).
-- [ ] Add figures: architecture diagram, trace tree example, benchmark results plot.
+- [ ] Add figures: architecture diagram and trace tree example.
 - [ ] Tighten abstract and contribution statement based on reviewer feedback.
