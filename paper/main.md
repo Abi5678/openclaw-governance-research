@@ -26,7 +26,8 @@ Multi-agent and tool-using AI systems are increasingly deployed in high-stakes d
 - Scenario 5: Async correlated-risk bypass.
 - Scenario 6: Module conflict (THROTTLE vs SERIALIZE).
 - Scenario 7: Audit reconstruction failure (fragmented traces).
-- Scenario 8: Safe task (negative control).
+- Scenario 8: Audit reconstruction (explicit skip markers).
+- Scenario 9: Safe task (negative control).
 
 ## 3. System Model
 
@@ -58,7 +59,7 @@ Multi-agent and tool-using AI systems are increasingly deployed in high-stakes d
 
 See `experiments/composition_benchmark.py` and `experiments/governance_service_benchmark.py`.
 
-- Benchmark design: 8 scenarios, 9 strategies.
+- Benchmark design: 9 scenarios, 9 strategies.
 - Metrics:
   - Final verdict accuracy.
   - Conflict count per scenario.
@@ -66,10 +67,10 @@ See `experiments/composition_benchmark.py` and `experiments/governance_service_b
   - Trace completeness (can we reconstruct the full path?).
   - Per-strategy latency overhead (mean/median/p95).
 - Results:
-  - `openclaw_ordered`: 8/8 accuracy.
-  - `priority_composition`: 7/8 accuracy, still mis-resolves the `throttle` vs `serialize` conflict.
-  - `naive_composition`: 1/8 (short-circuit failures).
-  - Single-module baselines: 2-3/8 each.
+  - `openclaw_ordered`: 9/9 accuracy.
+  - `priority_composition`: 8/9 accuracy, still mis-resolves the `throttle` vs `serialize` conflict.
+  - `naive_composition`: 1/9 (short-circuit failures).
+  - Single-module baselines: 2-4/9 each.
 - Latency overhead is now measured in the benchmark output and CSV export, so the remaining work is to interpret it in the paper rather than collect it.
 
 ## 8. Related Work

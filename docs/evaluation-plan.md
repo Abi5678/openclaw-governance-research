@@ -2,7 +2,7 @@
 
 ## Evaluation goal
 
-Show that governance composition catches failures missed by isolated mechanisms or naive composition.
+Show that governance composition catches failures missed by isolated mechanisms or naive composition, including reconstructable audit traces.
 
 ## Baselines
 
@@ -98,6 +98,7 @@ Human reviewer must reconstruct why an action was allowed, blocked, throttled, o
 
 Expected:
 - Unified trace has higher completeness than fragmented logs.
+- The trace-completeness metric is reported alongside verdict accuracy and latency.
 
 ## Metrics
 
@@ -107,6 +108,7 @@ Expected:
 - useful task completion
 - escalation correctness
 - trace completeness
+- audit reconstruction completeness
 - composition conflict count
 - latency overhead
 - lines of integration code / developer effort
