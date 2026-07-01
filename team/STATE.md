@@ -1,14 +1,14 @@
 # OpenClaw Team — Shared State
 
-Last updated: 2026-06-30
+Last updated: 2026-07-01
 
 ## Pipeline status
 
-| Role       | Last run        | Last artifact         | Status      |
-|------------|-----------------|-----------------------|-------------|
-| researcher | 2026-06-30      | team/RESEARCH_2026-06-30.md | DONE        |
-| builder    | (not yet)       | (none)                | IDLE        |
-| reviewer   | 2026-06-29      | team/REVIEW_2026-06-29.md | APPROVED    |
+| Role       | Last run        | Last artifact               | Status    |
+|------------|-----------------|-----------------------------|-----------|
+| researcher | 2026-07-01      | team/RESEARCH_2026-07-01.md | DONE      |
+| builder    | 2026-06-30      | team/BUILDER_2026-06-30.md  | DONE      |
+| reviewer   | 2026-06-30      | team/REVIEW_2026-06-30.md   | REQUESTED |
 
 ## Active increment
 
@@ -16,7 +16,7 @@ Last updated: 2026-06-30
 
 ## Blockers
 
-(none)
+- Reviewer requested fixes have been addressed in the paper-facing artifacts; the remaining open item is whether to export `trace_refs` from the real-adapter benchmark for direct skip-marker claims.
 
 ## Conventions
 

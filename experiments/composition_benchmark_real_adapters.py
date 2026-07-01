@@ -25,6 +25,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+try:
+    from typing import Protocol  # Python 3.8+
+except ImportError:  # pragma: no cover - compatibility for Python 3.7
+    from typing_extensions import Protocol  # type: ignore
+    import typing as _typing
+
+    _typing.Protocol = Protocol
+
 # Add repos to path so we can import real modules
 REPOS_BASE = Path(__file__).resolve().parent.parent.parent / "repos"
 sys.path.insert(0, str(REPOS_BASE / "sarc-governance"))

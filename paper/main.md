@@ -4,7 +4,7 @@
 
 ## Abstract
 
-Multi-agent and tool-using AI systems are increasingly deployed in high-stakes domains, yet current governance approaches focus on single control mechanisms (constraints, guardrails, authorization) without addressing how these heterogenous modules compose at runtime. We present OpenClaw-Govern, a composable runtime governance layer for recursive tool-using/meta-agent systems. Our key contribution is not any individual control mechanism, but a composition architecture that defines: (1) ordered module execution with deterministic resolution semantics, (2) delegation-envelope propagation across authority boundaries, (3) conflict detection and arbitration among conflicting verdicts (ALLOW, DENY, THROTTLE, SERIALIZE, ESCALATE), and (4) unified trace trees that reconstruct governance decisions across modules. We formalize eight composition-specific failure modes and evaluate our approach against baseline strategies (single-module, naive composition, short-circuit evaluation). Our ordered composition strategy achieves 100% accuracy on all failure modes, while naive composition and single-module baselines fail on 5-7 of 8 scenarios. We position OpenClaw-Govern relative to SARC, runtime authorization overlays, path-based governance, telemetry architectures, and agent safety benchmarks (ToolEmu, τ-bench, AgentBench, HELM), showing that these works motivate but do not replace composition-specific governance evaluation.
+Multi-agent and tool-using AI systems are increasingly deployed in high-stakes domains, yet current governance approaches focus on single control mechanisms (constraints, guardrails, authorization) without addressing how these heterogenous modules compose at runtime. We present OpenClaw-Govern, a composable runtime governance layer for recursive tool-using/meta-agent systems. Our key contribution is not any individual control mechanism, but a composition architecture that defines: (1) ordered module execution with deterministic resolution semantics, (2) delegation-envelope propagation across authority boundaries, (3) conflict detection and arbitration among conflicting verdicts (ALLOW, DENY, THROTTLE, SERIALIZE, ESCALATE), and (4) unified trace trees that reconstruct governance decisions across modules. We formalize nine composition-specific scenarios, including a negative control, and evaluate our approach against baseline strategies (single-module, naive composition, priority composition, short-circuit evaluation). Our ordered composition strategy achieves 100% accuracy on all nine scenarios, while priority composition still mis-resolves the serialized-vs-throttled conflict and naive composition fails on 8 of 9 scenarios. We position OpenClaw-Govern relative to SARC, runtime authorization overlays, ROMA-style orchestration, path-based governance, telemetry architectures, and agent safety benchmarks (ToolEmu, τ-bench, AgentBench, HELM), showing that these works motivate but do not replace composition-specific governance evaluation.
 
 ## 1. Introduction
 
@@ -13,7 +13,7 @@ Multi-agent and tool-using AI systems are increasingly deployed in high-stakes d
 - Key insight: runtime governance must be composable with clear ordering, conflict resolution, and unified traces.
 - Contributions:
   1. Composition architecture for heterogeneous governance modules.
-  2. Formalization of 8 composition failure modes.
+  2. Formalization of nine composition scenarios and failure modes.
   3. Deterministic benchmark showing ordered composition vs. baselines.
   4. Positioning relative to related work.
 
@@ -71,7 +71,7 @@ See `experiments/composition_benchmark.py` and `experiments/governance_service_b
   - `priority_composition`: 8/9 accuracy, still mis-resolves the `throttle` vs `serialize` conflict.
   - `naive_composition`: 1/9 (short-circuit failures).
   - Single-module baselines: 2-4/9 each.
-- Latency overhead is now measured in the benchmark output and CSV export, so the remaining work is to interpret it in the paper rather than collect it.
+  - Latency overhead is measured directly in the benchmark outputs and CSV export; current ordered-composition runs remain sub-0.01ms per scenario.
 
 ## 8. Related Work
 

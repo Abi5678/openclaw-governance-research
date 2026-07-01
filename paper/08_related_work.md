@@ -8,7 +8,7 @@ We position OpenClaw-Govern relative to five categories of prior work: runtime c
 
 ### 8.2 Authorization and Delegation
 
-Recent work on **compositional authorization** for AI agents formalizes delegation semantics, scope attenuation, and permission inheritance across trust boundaries [2]. This work answers "Can Agent B act on behalf of Agent A?" but assumes authorization is the sole governance mechanism. OpenClaw-Govern treats authorization as one module among many, defining how authorization verdicts compose with budget constraints, semantic guardrails, and async controls. Our contribution is not delegation semantics themselves, but how delegation-aware composition preserves constraints across authority boundaries.
+Recent work on **compositional authorization** for AI agents formalizes delegation semantics, scope attenuation, and permission inheritance across trust boundaries [2]. This work answers "Can Agent B act on behalf of Agent A?" but assumes authorization is the sole governance mechanism. OpenClaw-Govern treats authorization as one module among many, defining how authorization verdicts compose with budget constraints, semantic guardrails, and async controls. Our contribution is not delegation semantics themselves, but how delegation-aware composition preserves constraints across authority boundaries. ROMA-style recursive orchestration is a useful contrast case: it gives us delegation structure and traceable decomposition, but it does not arbitrate among heterogeneous runtime controls.
 
 ### 8.3 Path-Based Governance
 
@@ -17,6 +17,8 @@ Recent work on **compositional authorization** for AI agents formalizes delegati
 ### 8.4 Telemetry and Closed-Loop Enforcement
 
 **Governance-Aware Agent Telemetry** bridges observation and enforcement by streaming structured evidence to runtime policy engines [5]. **Five-Plane Architecture** provides a reference model for production governance with composed authority, mediation points, and structured evidence substrates [4]. These works focus on the observation layer—how to collect, transmit, and act on governance telemetry. OpenClaw-Govern operates at the **decision layer**—how to resolve conflicts when multiple policy engines produce competing verdicts. The two are complementary: our unified trace trees (Section 6) adopt the tamper-evident telemetry mindset while adding conflict resolution semantics.
+
+Policy-combining standards such as XACML and audit layers such as OPA decision logs provide a useful precedent for deterministic arbitration and auditable enforcement records [12,13]. They are adjacent to OpenClaw-Govern because they show how policy decisions can be combined and logged, but they stop at access-control boundaries rather than recursive delegation and heterogeneous runtime governance.
 
 ### 8.5 Robotics and Embodied Agent Governance
 
@@ -41,6 +43,7 @@ Table 4 positions OpenClaw-Govern relative to prior work. Checkmarks indicate wh
 | Policies on Paths [3] | Partial | ✗ | ✗ | ✗ |
 | Five-Plane Arch [4] | ✗ | ✗ | ✗ | ✓ |
 | Governance Telemetry [5] | ✗ | ✗ | ✗ | ✓ |
+| XACML / OPA decision logs [12,13] | ✗ | ✓ | ✗ | ✓ |
 | Embodied Governance [6] | ✗ | ✗ | ✗ | ✗ |
 | ToolEmu [7], τ-bench [9], AgentBench [10], HELM [11] | ✗ | ✗ | ✗ | ✗ |
 | **OpenClaw-Govern** | **✓** | **✓** | **✓** | **✓** |

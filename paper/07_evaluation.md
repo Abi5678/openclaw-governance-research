@@ -20,15 +20,16 @@ We evaluate nine strategies:
 - `none`: No governance (baseline)
 - Single-module strategies: `sarc_only`, `authz_only`, `guardrail_only`, `roma_only`, `async_only`
 - `naive_composition`: All modules, first-ALLOW short-circuit (fragmented composition)
+- `priority_composition`: All modules, priority-ranked arbitration without severity-aware conflict resolution
 - `openclaw_ordered`: All modules, ordered execution with deterministic arbitration (our approach)
 
 **Metrics.** For each scenario-strategy pair, we measure:
 - **Accuracy:** Does the resolved verdict match the expected verdict?
-- **Latency:** Wall-clock time per scenario (mean, median, P95 over 100 runs)
+- **Latency:** Wall-clock time per scenario (single deterministic pass; summarized as mean, median, P95 across the nine scenarios)
 - **Conflict count:** Number of distinct non-ALLOW interventions
-- **Trace completeness:** Can all module decisions be reconstructed, including explicit skip markers for short-circuited modules?
+- **Trace completeness:** Can all module decisions be reconstructed, including explicit skip markers for short-circuited modules in the toy benchmark export?
 
-**Results.** Table 1 shows accuracy by strategy. OpenClaw-Ordered achieves 100% accuracy, correctly resolving all nine scenarios. Naive composition scores 1/9 (11.1%), failing on all scenarios except the negative control. Single-module strategies score 2–4/9 (22.2–44.4%), each catching only failures in their specific domain.
+**Results.** Table 1 shows accuracy by strategy. OpenClaw-Ordered achieves 100% accuracy, correctly resolving all nine scenarios. Priority composition is a stronger baseline than naive short-circuiting, but it still mis-resolves Scenario 7 and therefore scores 8/9. Naive composition scores 1/9 (11.1%), failing on all scenarios except the negative control. Single-module strategies score 2–4/9 (22.2–44.4%), each catching only failures in their specific domain.
 
 **Table 1: Accuracy by Strategy (9 scenarios)**
 
@@ -41,9 +42,10 @@ We evaluate nine strategies:
 | ROMA Only | 2/9 | 22.2% |
 | Async Only | 3/9 | 33.3% |
 | Naive Composition | 1/9 | 11.1% |
+| Priority Composition | 8/9 | 88.9% |
 | **OpenClaw-Ordered** | **9/9** | **100.0%** |
 
-**Latency overhead.** Table 2 reports latency measurements. OpenClaw-Ordered adds 0.0282ms mean overhead vs. no governance (+1762.5% relative, but +0.0282ms absolute). This absolute overhead is negligible compared to:
+**Latency overhead.** Table 2 reports latency measurements from the current real-adapter benchmark run. OpenClaw-Ordered adds 0.0050ms mean overhead vs. no governance (+1000% relative, but still sub-0.01ms absolute). This absolute overhead is negligible compared to:
 - LLM inference (100ms–10s per call)
 - Network RTT for remote tool calls (10–1000ms)
 - Human-in-the-loop escalation (seconds to minutes)
@@ -52,16 +54,16 @@ We evaluate nine strategies:
 
 | Strategy | Mean | Median | P95 | Absolute Overhead |
 |----------|------|--------|-----|------------------|
-| None (baseline) | 0.0016 | 0.0007 | 0.0052 | — |
-| SARC Only | 0.0351 | 0.0222 | 0.0930 | +0.0335 |
-| Authorization Only | 0.0086 | 0.0065 | 0.0153 | +0.0070 |
-| Guardrail Only | 0.0049 | 0.0043 | 0.0064 | +0.0033 |
-| ROMA Only | 0.0061 | 0.0055 | 0.0093 | +0.0045 |
-| Async Only | 0.0060 | 0.0051 | 0.0084 | +0.0044 |
-| Naive Composition | 0.0152 | 0.0120 | 0.0282 | +0.0136 |
-| **OpenClaw-Ordered** | **0.0298** | **0.0252** | **0.0509** | **+0.0282** |
+| None (baseline) | 0.0005 | 0.0003 | 0.0017 | — |
+| SARC Only | 0.0059 | 0.0050 | 0.0124 | +0.0054 |
+| Authorization Only | 0.0018 | 0.0015 | 0.0031 | +0.0013 |
+| Guardrail Only | 0.0011 | 0.0010 | 0.0016 | +0.0006 |
+| ROMA Only | 0.0011 | 0.0010 | 0.0016 | +0.0006 |
+| Async Only | 0.0014 | 0.0011 | 0.0025 | +0.0009 |
+| Naive Composition | 0.0029 | 0.0022 | 0.0058 | +0.0024 |
+| **OpenClaw-Ordered** | **0.0055** | **0.0049** | **0.0084** | **+0.0050** |
 
-**Conflict resolution.** Only OpenClaw-Ordered correctly resolves Scenario 7 (`throttle_vs_serialize_conflict`), returning SERIALIZE (the stricter verdict) while recording both THROTTLE and SERIALIZE interventions in the trace. Scenario 8 (`audit_reconstruction`) returns DENY while preserving explicit skip markers for downstream modules, letting a reviewer reconstruct the full path from the unified trace. Naive composition returns ALLOW (short-circuits on first module's ALLOW), hiding the conflict entirely.
+**Conflict resolution.** Only OpenClaw-Ordered correctly resolves Scenario 7 (`throttle_vs_serialize_conflict`), returning SERIALIZE (the stricter verdict) while recording both THROTTLE and SERIALIZE interventions in the toy benchmark trace export. Scenario 8 (`audit_reconstruction`) returns DENY while preserving explicit skip markers in the toy benchmark when `audit_trace=True`; the real-adapter validation currently checks verdict correctness and trace completeness, but does not export skip markers. Naive composition returns ALLOW (short-circuits on first module's ALLOW), hiding the conflict entirely.
 
 ### 7.2 Governance Service Benchmark
 
@@ -71,7 +73,7 @@ We evaluate nine strategies:
 - **Accuracy:** 7/7 (100%)
 - **Detection rate:** 5/5 (100% of violations caught)
 - **False positive rate:** 0/2 (0% false alarms)
-- **P95 latency:** 0.0241ms
+- **P95 latency:** 0.0182ms
 - **Trace completeness:** 7/7 (100%)
 
 In the `mixed_conflict` case (simultaneous PII + brand safety + regulatory violations), the service correctly returns DENY while recording all three interventions (DENY, ESCALATE, REWRITE) in the unified trace.
@@ -96,7 +98,7 @@ In the `mixed_conflict` case (simultaneous PII + brand safety + regulatory viola
 | SARC Only | 2/9 (22.2%) | 2/9 (22.2%) |
 | AuthZ Only | 4/9 (44.4%) | 4/9 (44.4%) |
 
-**Latency (real adapters):** Mean overhead is 0.0282ms—virtually identical to toy modules. This confirms that composition overhead is dominated by the resolution function, not individual module logic.
+**Latency (real adapters):** Mean overhead is 0.0055ms with P95 at 0.0084ms—virtually identical to the toy benchmark's sub-0.01ms regime. This confirms that composition overhead is dominated by the resolution function and adapter plumbing, not individual module logic.
 
 ### 7.4 Threats to Validity
 

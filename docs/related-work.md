@@ -33,6 +33,7 @@ This matrix is scoped to the paper’s novelty claim: **composable runtime gover
 2. **ROMA covers recursive delegation, not governance arbitration.**
    - ROMA's recursive task trees and traceable context flow are a strong fit for long-horizon decomposition.
    - OpenClaw-Govern layers governance on top of that orchestration so conflicting runtime controls can be ordered and reconciled deterministically.
+   - XACML combining algorithms and OPA decision logs are useful precedents for arbitration and auditability, but they do not address recursive tool-agent delegation plus heterogeneous governance composition.
 
 3. **Authorization work covers delegation, not the whole stack.**
    - The overlay/compositional authorization line is a good fit for recursive delegation and scope attenuation.
