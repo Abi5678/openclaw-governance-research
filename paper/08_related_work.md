@@ -20,17 +20,21 @@ Recent work on **compositional authorization** for AI agents formalizes delegati
 
 Policy-combining standards such as XACML and audit layers such as OPA decision logs provide a useful precedent for deterministic arbitration and auditable enforcement records [12,13]. They are adjacent to OpenClaw-Govern because they show how policy decisions can be combined and logged, but they stop at access-control boundaries rather than recursive delegation and heterogeneous runtime governance.
 
-### 8.5 Robotics and Embodied Agent Governance
+### 8.5 Action-Runtime Security and Receipts
+
+**AARM** (Autonomous Action Runtime Management) specifies runtime interception for AI-driven actions, including contextual evaluation, allow/deny/modify/defer/step-up decisions, and tamper-evident receipts for forensic reconstruction [14]. That makes AARM the closest precedent for the interception layer in a governed agent system. OpenClaw-Govern uses the same runtime-security intuition but asks a different question: when SARC-style constraints, authorization propagation, semantic guardrails, and async controls all fire on the same action, how do we order and reconcile them deterministically? Our contribution is therefore the composition layer above interception, not interception alone.
+
+### 8.6 Robotics and Embodied Agent Governance
 
 **Runtime Governance for Embodied Agents** applies runtime constraint enforcement to robotic execution, with admission control, monitoring, rollback, and human override [6]. This work reinforces the runtime governance pattern in a different domain (embodied execution vs. tool-using agents). OpenClaw-Govern targets recursive tool-using agents and their unique failure modes (delegation leaks, async correlated risk, fragmented traces). The robotics analogy validates the runtime governance approach but does not address the composition-specific challenges of meta-agent systems.
 
-### 8.6 Agent Safety Benchmarks
+### 8.7 Agent Safety Benchmarks
 
 **ToolEmu** emulates a sandbox of 36 high-stakes tools to identify risky tool-use failures across 144 test cases [7]. **τ-bench** evaluates tool-agent-user interaction across 40+ turns with policy guidelines and database-state evaluation [9]. **AgentBench** tests LLMs as agents across eight interactive environments [10]. **HELM** provides holistic model evaluation across capabilities, safety, and domain benchmarks [11].
 
 These benchmarks answer "Are agents safe?" by measuring task-level outcomes. OpenClaw-Govern answers a different question: "**Is the governance layer itself correct?**" Our evaluation isolates the composition layer—does ordered execution with deterministic arbitration correctly resolve conflicting verdicts? We cite these benchmarks as motivation (agent safety matters) but distinguish our contribution: we evaluate **governance composition**, not agent capability.
 
-### 8.7 Summary
+### 8.8 Summary
 
 Table 4 positions OpenClaw-Govern relative to prior work. Checkmarks indicate which dimensions each work addresses. OpenClaw-Govern is the only work addressing all four: ordered execution, conflict arbitration, delegation propagation, and unified traces.
 
@@ -44,6 +48,7 @@ Table 4 positions OpenClaw-Govern relative to prior work. Checkmarks indicate wh
 | Five-Plane Arch [4] | ✗ | ✗ | ✗ | ✓ |
 | Governance Telemetry [5] | ✗ | ✗ | ✗ | ✓ |
 | XACML / OPA decision logs [12,13] | ✗ | ✓ | ✗ | ✓ |
+| AARM [14] | ✗ | ✗ | ✗ | Partial |
 | Embodied Governance [6] | ✗ | ✗ | ✗ | ✗ |
 | ToolEmu [7], τ-bench [9], AgentBench [10], HELM [11] | ✗ | ✗ | ✗ | ✗ |
 | **OpenClaw-Govern** | **✓** | **✓** | **✓** | **✓** |

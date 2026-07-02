@@ -1,6 +1,6 @@
 # Related Work Matrix
 
-**Access date:** 2026-06-26
+**Access date:** 2026-07-02
 
 This matrix is scoped to the paper’s novelty claim: **composable runtime governance for recursive tool-using/meta-agent systems**. The key gap is not any single control mechanism or benchmark, but how control, delegation, ordering, conflict resolution, and auditability compose at runtime. In particular, ROMA-style recursive orchestration is useful for delegation and traceability, but it does not by itself resolve governance conflicts across runtime modules.
 
@@ -60,6 +60,10 @@ This matrix is scoped to the paper’s novelty claim: **composable runtime gover
    - XACML defines deterministic policy-combining algorithms, and OPA's decision logs provide a useful audit precedent.
    - OpenClaw-Govern extends that lineage into recursive agent governance, where ordering must reconcile delegated authority, semantic guardrails, async correlation, and unified traces across multiple runtime modules.
 
+9. **AARM is the closest action-runtime interception precedent, not the composition layer.**
+   - AARM focuses on runtime interception, contextual evaluation, and tamper-evident receipts for AI-driven actions.
+   - OpenClaw-Govern uses that interception mindset but composes it with authorization propagation, guardrails, async controls, and conflict arbitration across heterogeneous modules.
+
 ## Sources
 
 - SARC: https://arxiv.org/html/2605.07728
@@ -71,7 +75,7 @@ This matrix is scoped to the paper’s novelty claim: **composable runtime gover
 - Authenticated Workflows: https://arxiv.org/html/2602.10465v1
 - XACML 3.0 core spec: https://docs.oasis-open.org/xacml/3.0/xacml-3.0-core-spec-os-en.html
 - XACML 3.0 Additional Combining Algorithms Profile: https://docs.oasis-open.org/xacml/xacml-3.0-combalgs/v1.0/csprd03/xacml-3.0-combalgs-v1.0-csprd03.html
-- Autonomous Action Runtime Management (AARM): https://arxiv.org/html/2602.09433v1
+- Autonomous Action Runtime Management (AARM): https://arxiv.org/html/2602.09433v1 (accessed 2026-07-02)
 - ROMA paper: https://arxiv.org/abs/2602.01848
 - ROMA repo: https://github.com/sentient-agi/ROMA
 - ROMA blog post: https://www.sentient.xyz/blog/recursive-open-meta-agent
