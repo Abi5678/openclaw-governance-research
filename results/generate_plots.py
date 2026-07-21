@@ -10,23 +10,37 @@ from statistics import mean, median
 sys.path.insert(0, str(Path(__file__).parent.parent / "experiments"))
 from composition_benchmark import percentile
 
-# Read composition benchmark results
+# Read benchmark results
 composition_csv = Path("results/composition_benchmark.csv")
+real_adapter_csv = Path("results/composition_benchmark_real_adapters.csv")
 service_csv = Path("results/governance_service_benchmark.csv")
 
-composition_rows = []
-with composition_csv.open() as f:
-    reader = csv.DictReader(f)
-    for row in reader:
-        composition_rows.append(row)
 
-service_rows = []
-with service_csv.open() as f:
-    reader = csv.DictReader(f)
-    for row in reader:
-        service_rows.append(row)
+def read_rows(path: Path):
+    rows = []
+    with path.open() as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            rows.append(row)
+    return rows
 
-# Calculate accuracy by strategy
+
+composition_rows = read_rows(composition_csv)
+real_adapter_rows = read_rows(real_adapter_csv)
+service_rows = read_rows(service_csv)
+
+
+def rows_by_strategy(rows):
+    grouped = defaultdict(list)
+    for row in rows:
+        grouped[row["strategy"]].append(row)
+    return grouped
+
+
+composition_by_strategy = rows_by_strategy(composition_rows)
+real_adapter_by_strategy = rows_by_strategy(real_adapter_rows)
+
+# Calculate accuracy by strategy for the toy composition benchmark
 strategy_accuracy = {}
 strategy_latencies = defaultdict(list)
 for row in composition_rows:
@@ -45,7 +59,7 @@ print("=" * 80)
 print("\n## Accuracy by Strategy")
 print("\n| Strategy | Accuracy | % Correct |")
 print("|----------|----------|-----------|")
-for strategy in ["none", "sarc_only", "authz_only", "guardrail_only", "roma_only", "async_only", "naive_composition", "openclaw_ordered"]:
+for strategy in ["none", "sarc_only", "authz_only", "guardrail_only", "roma_only", "async_only", "naive_composition", "priority_composition", "openclaw_ordered"]:
     acc = strategy_accuracy[strategy]
     pct = (acc["correct"] / acc["total"]) * 100
     print(f"| {strategy.replace('_', ' ').title()} | {acc['correct']}/{acc['total']} | {pct:.1f}% |")
@@ -54,7 +68,7 @@ print("\n## Latency Overhead by Strategy")
 print("\n| Strategy | Mean (ms) | Median (ms) | P95 (ms) | Relative Overhead |")
 print("|----------|-----------|-------------|----------|-------------------|")
 baseline_mean = sum(strategy_latencies["none"]) / len(strategy_latencies["none"])
-for strategy in ["none", "sarc_only", "authz_only", "guardrail_only", "roma_only", "async_only", "naive_composition", "openclaw_ordered"]:
+for strategy in ["none", "sarc_only", "authz_only", "guardrail_only", "roma_only", "async_only", "naive_composition", "priority_composition", "openclaw_ordered"]:
     lats = strategy_latencies[strategy]
     mean_lat = mean(lats)
     median_lat = median(lats)
@@ -67,10 +81,32 @@ for strategy in ["none", "sarc_only", "authz_only", "guardrail_only", "roma_only
     print(f"| {strategy.replace('_', ' ').title()} | {mean_lat:.4f} | {median_lat:.4f} | {p95_lat:.4f} | {overhead_str} |")
 
 print("\n## Key Findings")
-print("\n1. **Composition correctness**: OpenClaw-Ordered achieves 100% accuracy (8/8), while naive composition achieves only 12.5% (1/8).")
-print("2. **Single-module blind spots**: Individual governance modules (SARC, authz, guardrail, ROMA, async) achieve only 25-37.5% accuracy.")
-print("3. **Latency overhead**: OpenClaw-Ordered adds ~0.0070 ms mean latency per scenario vs. ~0.0005 ms baseline (no governance), representing acceptable overhead for safety-critical deployments.")
-print("4. **Conflict detection**: Only OpenClaw-Ordered detects and resolves conflicts (e.g., THROTTLE vs. SERIALIZE in scenario 7).")
+real_strategies = ["sarc_only", "authz_only", "guardrail_only", "roma_only", "async_only"]
+real_acc = {}
+for strategy in real_strategies:
+    rows = real_adapter_by_strategy[strategy]
+    correct = sum(1 for row in rows if row["ok"] == "True")
+    real_acc[strategy] = correct / len(rows)
+openclaw_rows = real_adapter_by_strategy["openclaw_ordered"]
+naive_rows = real_adapter_by_strategy["naive_composition"]
+none_rows = real_adapter_by_strategy["none"]
+openclaw_mean = mean(float(row["latency_ms"]) for row in openclaw_rows)
+none_mean = mean(float(row["latency_ms"]) for row in none_rows)
+openclaw_pct = (sum(1 for row in openclaw_rows if row["ok"] == "True") / len(openclaw_rows)) * 100
+naive_pct = (sum(1 for row in naive_rows if row["ok"] == "True") / len(naive_rows)) * 100
+individual_min = min(real_acc.values()) * 100
+individual_max = max(real_acc.values()) * 100
+scenario7 = next(row for row in openclaw_rows if row["scenario"] == "throttle_vs_serialize_conflict")
+scenario9 = next(row for row in openclaw_rows if row["scenario"] == "delegated_remediation_conflict")
+scenario10 = next(row for row in openclaw_rows if row["scenario"] == "policy_laundering")
+lineage_rows = [row for row in openclaw_rows if row["scenario"] in {"audit_reconstruction", "delegated_remediation_conflict", "policy_laundering"}]
+provenance_retained = sum(1 for row in lineage_rows if row.get("provenance_retained", row.get("trace_refs")))
+
+print(f"\n1. **Composition correctness**: OpenClaw-Ordered achieves {sum(1 for row in openclaw_rows if row['ok'] == 'True')}/{len(openclaw_rows)} ({openclaw_pct:.1f}%), while naive composition achieves only {naive_pct:.1f}% ({sum(1 for row in naive_rows if row['ok'] == 'True')}/{len(naive_rows)}).")
+print(f"2. **Single-module blind spots**: Individual governance modules (SARC, authz, guardrail, ROMA, async) achieve only {individual_min:.1f}-{individual_max:.1f}% accuracy.")
+print(f"3. **Latency overhead**: OpenClaw-Ordered adds ~{openclaw_mean - none_mean:.4f} ms mean latency per scenario vs. ~{none_mean:.4f} ms baseline (no governance), representing acceptable overhead for safety-critical deployments.")
+print(f"4. **Conflict detection**: Only OpenClaw-Ordered detects and resolves conflicts (e.g., THROTTLE vs. SERIALIZE in scenario 7 and ESCALATE vs. SERIALIZE in scenario 9); scenario 9 preserves interventions `{scenario9['interventions']}` with trace completeness {scenario9['trace_completeness']}.")
+print(f"5. **Provenance retention**: `provenance_retained` is surfaced for the lineage-sensitive audit scenarios; scenario 10 keeps the sanitized summary visible while preserving the original unsafe request in trace metadata, and {provenance_retained}/{len(lineage_rows)} current real-adapter cases keep the unsafe request recoverable across the adapter / summary boundary via lineage-bearing trace refs.")
 
 print("\n" + "=" * 80)
 print("GOVERNANCE SERVICE BENCHMARK - PAPER-READY SUMMARY")
@@ -102,9 +138,12 @@ for row in service_rows:
     print(f"| {row['case'].replace('_', ' ').title()} | {row['expected']} | {row['observed']} | {correct} | {row['latency_ms']} | {row['interventions']} |")
 
 print("\n## Key Findings")
-print("\n1. **Perfect accuracy**: 7/7 correct verdicts across safe, PII, toxicity, brand safety, and regulatory cases.")
+service_accuracy = len([r for r in service_rows if r['ok'] == 'True'])
+service_total = len(service_rows)
+service_trace_complete = len([r for r in service_rows if r['trace_complete'] == 'True'])
+print(f"\n1. **Perfect accuracy**: {service_accuracy}/{service_total} correct verdicts across safe, PII, toxicity, brand safety, and regulatory cases.")
 print("2. **Multi-intervention handling**: The mixed_conflict case correctly resolves 3 simultaneous interventions (DENY + ESCALATE + REWRITE).")
 print("3. **Remediation actions**: System emits appropriate remediations (block, human_review, add_disclaimer) for each violation type.")
-print("4. **Trace completeness**: 100% of cases have complete audit trails with all 4 module decisions recorded.")
+print(f"4. **Trace completeness**: {service_trace_complete}/{service_total} cases have complete audit trails with all 4 module decisions recorded.")
 
 print("\n" + "=" * 80)

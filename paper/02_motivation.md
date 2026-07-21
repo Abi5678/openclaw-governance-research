@@ -26,9 +26,9 @@ Two async actions are submitted concurrently: closing a road for emergency repai
 
 **Root cause:** Conflicting non-ALLOW verdicts require deterministic arbitration. Without explicit rules (DENY > ESCALATE > SERIALIZE > THROTTLE > ALLOW), composition produces unpredictable outcomes.
 
-### 2.4 The Eight Composition Failure Modes
+### 2.4 The Nine Composition Failure Modes
 
-From these and similar scenarios, we derive eight composition-specific failure modes:
+From these and similar scenarios, we derive nine composition-specific failure modes:
 
 1. **Short-circuit bypass:** First-ALLOW short-circuiting suppresses downstream module checks.
 2. **Constraint inheritance failure:** Delegated agents receive permissions but not parent constraints.
@@ -37,6 +37,7 @@ From these and similar scenarios, we derive eight composition-specific failure m
 5. **Async correlated risk bypass:** Concurrent actions individually pass checks but collectively exceed risk thresholds.
 6. **Conflict non-resolution:** Conflicting verdicts (THROTTLE vs. SERIALIZE) resolve non-deterministically.
 7. **Audit fragmentation:** Module-level traces cannot be reconstructed into a unified decision tree.
-8. **Safe task false positive:** Negative control—governance should ALLOW benign tasks without interference.
+8. **Policy laundering:** A child agent sanitizes an unsafe request into a benign-looking summary before forwarding it to a downstream executor; if the summary is all that survives, output-only checks can miss the original unsafe intent because provenance was lost across the adapter boundary.
+9. **Safe task false positive:** Negative control—governance should ALLOW benign tasks without interference.
 
-These failure modes are not hypothetical—they arise inevitably when governance modules are composed without defined ordering, conflict semantics, or unified tracing. Our evaluation (Section 7) demonstrates that naive composition fails 7 of 8 scenarios, while ordered composition with deterministic arbitration achieves 100% accuracy.
+These failure modes are not hypothetical—they arise inevitably when governance modules are composed without defined ordering, conflict semantics, or unified tracing. Our evaluation (Section 7) demonstrates that naive composition fails 8 of 9 scenarios, while ordered composition with deterministic arbitration achieves 100% accuracy.

@@ -9,7 +9,7 @@ This matrix is scoped to the paper’s novelty claim: **composable runtime gover
 | Work | Core contribution | What it does well | What it does not cover for OpenClaw-Govern |
 | --- | --- | --- | --- |
 | SARC | Compiles constraints into runtime enforcement sites (pre-action, action-time, post-action, escalation) | Strong runtime enforcement framing; auditable constraints | Does not by itself solve composition across heterogeneous governance modules, ordering semantics, or conflict resolution across delegation/async/guardrail layers |
-| ROMA / Recursive Open Meta-Agent | Recursive task decomposition with Atomizer/Planner/Executor/Aggregator roles and traceable context flow | Strong hierarchical orchestration, delegation structure, and transparent execution traces | Does not define a governance layer for arbitration among runtime controls; traceability is orchestration-level, not conflict-resolution semantics |
+| ROMA / Recursive Open Meta-Agent | Recursive task decomposition with Atomizer/Planner/Executor/Aggregator roles and traceable context flow | Strong hierarchical orchestration, delegation lineage, and transparent execution traces | Does not define a governance layer for arbitration among runtime controls; traceability is orchestration-level, not conflict-resolution semantics |
 | Overlaying Governance / compositional authorization | Delegation and scope attenuation for agentic access; overlays agent semantics onto existing policies | Formalizes delegation paths and scope attenuation | Focuses on authorization semantics, not the full governance stack: async controls, guardrail arbitration, unified traces, or cross-module conflict resolution |
 | Runtime Governance for AI Agents: Policies on Paths | Makes execution path the object of governance; path-dependent policy evaluation | Captures non-deterministic, sequence-sensitive policy risks | Does not provide a compositional governance architecture with multiple heterogeneous modules and deterministic resolution rules |
 | Five-Plane Reference Architecture for Runtime Governance of Production AI Agents | Composed authority, mediation points, structured evidence substrate | Strong enterprise/runtime governance architecture and evidence framing | More oriented to a reference architecture for production governance than to recursive agent adapters, module ordering semantics, or benchmarked module composition failures |
@@ -28,12 +28,12 @@ This matrix is scoped to the paper’s novelty claim: **composable runtime gover
 
 1. **SARC is necessary but not sufficient.**
    - SARC supplies the runtime constraint-enforcement mindset.
-   - OpenClaw-Govern extends that into a **composition layer** for multiple governance modules.
+   - OpenClaw-Govern extends that into a **composition layer** for multiple governance modules, including delegation, interception, async controls, and conflict arbitration.
 
 2. **ROMA covers recursive delegation, not governance arbitration.**
-   - ROMA's recursive task trees and traceable context flow are a strong fit for long-horizon decomposition.
+   - ROMA's recursive task trees and traceable context flow are a strong fit for long-horizon decomposition and delegation lineage.
    - OpenClaw-Govern layers governance on top of that orchestration so conflicting runtime controls can be ordered and reconciled deterministically.
-   - XACML combining algorithms and OPA decision logs are useful precedents for arbitration and auditability, but they do not address recursive tool-agent delegation plus heterogeneous governance composition.
+   - XACML combining algorithms and OPA decision logs are useful precedents for deterministic arbitration and auditability, but they do not address recursive tool-agent delegation plus heterogeneous governance composition.
 
 3. **Authorization work covers delegation, not the whole stack.**
    - The overlay/compositional authorization line is a good fit for recursive delegation and scope attenuation.
@@ -63,6 +63,12 @@ This matrix is scoped to the paper’s novelty claim: **composable runtime gover
 9. **AARM is the closest action-runtime interception precedent, not the composition layer.**
    - AARM focuses on runtime interception, contextual evaluation, and tamper-evident receipts for AI-driven actions.
    - OpenClaw-Govern uses that interception mindset but composes it with authorization propagation, guardrails, async controls, and conflict arbitration across heterogeneous modules.
+   - In the delegated-remediation-conflict scenario, that composition layer must keep both the step-up and serialization signals visible in the trace even though the final verdict is ESCALATE; delegation lineage and arbitration remain visible together instead of collapsing into a SARC-only story.
+
+10. **Prompt-injection and trace-analysis work motivate provenance-preserving governance, not the novelty claim.**
+   - When unsafe intent is sanitized into a benign-looking summary, the system needs to preserve original provenance through the adapter boundary so later reviewers can reconstruct the laundered intent.
+   - AgentArmor-style trace reconstruction, AuthGraph-style parameter-source provenance, VIGIL-style verify-before-commit, and trace-based assurance provide precedent for that provenance requirement, and they justify a dedicated `provenance_retention` metric in our evaluation surface.
+   - OpenClaw-Govern's contribution is still the composition layer: ordered runtime modules, deterministic arbitration, and unified traces across heterogeneous controls.
 
 ## Sources
 
